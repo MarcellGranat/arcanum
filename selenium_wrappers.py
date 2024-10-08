@@ -4,13 +4,30 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.firefox.options import Options
 import tempfile
 import webbrowser
+from pathlib import Path
+import os
+
+
+def data_folder():
+    folder = str(Path("./data").resolve())
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+        print("Folder created")
+    return folder
 
 browser = None
 
-def sln_start_firefox(headless = False):
+def sln_start_firefox(headless = False, download_folder: str | None = None):
+    if download_folder is None:
+        download_folder = data_folder()
     firefox_capabilities = DesiredCapabilities.FIREFOX
     firefox_capabilities['marionette'] = True
     options = Options()
+    options.set_preference("browser.download.folderList", 2)
+    options.set_preference("browser.download.manager.showWhenStarting", False)
+    options.set_preference("browser.download.dir", download_folder)
+    options.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/x-gzip")
+
     if headless:
         options.add_argument('-headless')
     global browser

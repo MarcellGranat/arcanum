@@ -1,9 +1,11 @@
 from selenium_wrappers import *
-import login
 from selenium.webdriver.common.keys import Keys
 from time import sleep
 from tqdm import tqdm
 from selenium.webdriver.common.action_chains import ActionChains
+from logger_config import get_logger
+
+logger = get_logger()
 
 def subheaders():
     return sln_partial_find_all(pattern="MuiTreeItem-label")
@@ -13,7 +15,7 @@ def titles_to_txt(filename: str="titles.txt"):
     with open(filename, "w") as f:
         f.write("\n".join(titles))
 
-    print(filename + " created")
+    logger.success(filename + " created")
 
 def n_pages():
   n = sln_partial_find_all("MuiInputAdornment-root MuiInputAdornment-positionEnd MuiInputAdornment-outlined MuiInputAdornment-sizeMedium")[1]
@@ -42,7 +44,7 @@ def close_pdf_window() -> None:
             browser.close()
             break
         else: # if it is not a pdf window
-            print("A new window is opened.")
+            logger.error("A new window is opened.")
             break
     windows = browser.window_handles
     browser.switch_to.window(windows[0])
@@ -71,13 +73,13 @@ def download_pdf(pages_from: int = 1, pages_to: int = 10) -> None:
     save_button.click()
     sleep(2)
 
-    print(f"Downloaded pages {pages_from} to {pages_to}")
+    logger.info(f"Downloaded pages {pages_from}-{pages_to}")
 
-def download_in_batches(on_error):
+def download_in_batches(on_error, msg = "Downloading"):
     prev_page_nmr = 1
     n_subheaders = len(subheaders())
     # for subheader in tqdm(subheaders()[1:], "Downloading"):
-    for i in tqdm(range(1, n_subheaders), "Downloading"):
+    for i in tqdm(range(1, n_subheaders), msg):
         while True:
             try:
                 subheader = subheaders()[i]
@@ -88,8 +90,8 @@ def download_in_batches(on_error):
                 close_pdf_window()
                 prev_page_nmr = current_page_nmr
                 break
-            except:
-                on_error
+            except Exception as e:
+                on_error(e)
 
     # download the last page
     download_pdf(prev_page_nmr, n_pages())
@@ -98,35 +100,36 @@ def download_in_batches(on_error):
 
 def start_batch(data_pdf):  
     data_link = f"https://adt.arcanum.com{data_pdf}?pg=0&layout=s"
-    txt_filename = data_pdf.split("/")[3]
+    txt_filename = data_folder() + "/" + data_pdf.split("/")[3] + ".txt"
     sln_go_to(data_link)
     sleep(2)
     titles_to_txt(txt_filename)
 
-def on_error(error, url_to_restart, **kwargs):
-    print(error)
+def default_on_error(error, url_to_restart, **kwargs):
+    logger.error(error)
     sln_start_firefox(**kwargs)
     sln_go_to(url_to_restart)
     sleep(15)
     sln_refresh()
 
+def main(data_pdf, **kwargs):
+    start_batch(data_pdf=data_pdf)
+    def custom__on_error(error):
+        default_on_error(error, data_pdf, **kwargs)
+
+    download_in_batches(on_error=custom__on_error, msg=data_pdf)
+    logger.success(data_pdf + "Done!")
 
 if __name__ == "__main__":
+    import login
+    import open_magazine
     sln_start_firefox(headless=False)
     login.main()
     sleep(2)
-    from open_magazine import *
-    go_to_magazine("NemzetiSport")
+    open_magazine.go_to_magazine("NemzetiSport")
     sleep(1)
-    go_to_block("1910-1919")
+    sln_go_to(open_magazine.link_for_block(0))
     sleep(1)
-    data_pdf = next(yield_pdf_viewer_links())
-    data_pdf = f"https://adt.arcanum.com{data_pdf}?pg=0&layout=s"
-    sln_go_to(data_pdf)
+    data_pdf = open_magazine.pdf_viewer_links()[0]
     sleep(3)
-    download_in_batches()
-
-
-
-
-    
+    main(data_pdf=data_pdf)

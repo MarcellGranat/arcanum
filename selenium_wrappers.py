@@ -6,13 +6,16 @@ import tempfile
 import webbrowser
 from pathlib import Path
 import os
+from logger_config import get_logger
+
+logger = get_logger()
 
 
 def data_folder():
     folder = str(Path("./data").resolve())
     if not os.path.exists(folder):
         os.makedirs(folder)
-        print("Folder created")
+        logger.info("Folder created")
     return folder
 
 browser = None
@@ -33,9 +36,9 @@ def sln_start_firefox(headless = False, download_folder: str | None = None):
     global browser
     browser = webdriver.Firefox(capabilities=firefox_capabilities, options=options)
     if headless:
-      print("Firefox started in headless mode")
+      logger.info("Firefox started in headless mode")
     else:
-      print("Firefox started")
+      logger.info("Firefox started")
     
 def sln_get_browser():
     return browser
@@ -75,7 +78,7 @@ def sln_find_all_by_id(id):
     return browser.find_elements("id", id)
 
 def sln_go_to(url):
-    print("Going to " + url)
+    logger.info("Going to " + url)
     browser.get(url)
     
 def sln_texts(elements):

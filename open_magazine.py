@@ -31,6 +31,4 @@ def yield_pdf_viewer_links():
     pdf_links = [_ for _ in pdf_links if _.get_attribute("data-pdf") is not None]
     pdf_links = [_ for _ in pdf_links if _.get_attribute("data-pdf") != ""]
     pdf_links = [_.get_attribute("data-pdf") for _ in pdf_links]
-    for link in pdf_links:
-        yield link
     return pdf_links

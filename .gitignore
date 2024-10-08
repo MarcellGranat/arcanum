@@ -3,3 +3,7 @@
 .RData
 .Ruserdata
 .env
+data/*
+*pdf
+__pycache__*
+geckodriver.log

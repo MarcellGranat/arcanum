@@ -28,4 +28,4 @@ def main(magazine, blocks: int | range | None = None, years: int | range | None 
             download_pdf.main(data_pdf=data_pdf, headless=headless)
 
 if __name__ == "__main__":
-    main(magazine="Nepszava", blocks=range(3, 10), headless=True)
+    main(magazine="Nepszava", blocks=range(3, 10), headless=False)

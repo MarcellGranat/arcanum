@@ -8,9 +8,9 @@ def go_to_magazine(magazine):
 def blocks():
     block_buttons = sln_partial_find_all("btn")
     if block_buttons:
-       block_buttons = block_buttons[1:]
-       block_buttons = [button for button in block_buttons if button.get_attribute("href") is not None]
-       block_buttons = [button for button in block_buttons if button.text != '']
+        block_buttons = block_buttons[1:]
+        block_buttons = [button for button in block_buttons if button.get_attribute("href") is not None]
+        block_buttons = [button for button in block_buttons if button.text != '']
     return block_buttons
 
 def pdf_viewer_links():

@@ -1,6 +1,5 @@
 from webbrowser import BaseBrowser
 from selenium import webdriver
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.firefox.options import Options
 import tempfile
 import webbrowser
@@ -23,8 +22,6 @@ browser = None
 def sln_start_firefox(headless = False, download_folder: str | None = None):
     if download_folder is None:
         download_folder = data_folder()
-    firefox_capabilities = DesiredCapabilities.FIREFOX
-    firefox_capabilities['marionette'] = True
     options = Options()
     options.set_preference("browser.download.folderList", 2)
     options.set_preference("browser.download.manager.showWhenStarting", False)
@@ -34,7 +31,7 @@ def sln_start_firefox(headless = False, download_folder: str | None = None):
     if headless:
         options.add_argument('-headless')
     global browser
-    browser = webdriver.Firefox(capabilities=firefox_capabilities, options=options)
+    browser = webdriver.Firefox(options=options)
     if headless:
       logger.info("Firefox started in headless mode")
     else:
